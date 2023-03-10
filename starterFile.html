@@ -35,9 +35,15 @@
       let animationSpeed = 10;
       let linkY = 135;
       let linkX = 116;
+      let gameObjects = [];
+      let maps = [];
+      let gameMap = null;
 
+      function GameObject ( {
+        
+      })
 
-			//keyDown and keyUp will take care of what happens when you press a button in the game
+      //keyDown and keyUp will take care of what happens when you press a button in the game
       function keyDownHandler(e) {
         if (e.keyCode == 37) {
           leftPressed = true;
@@ -66,13 +72,12 @@
         }
       }
 
-
-			//drawLink animates Link's basic movements
+      //drawLink animates Link's basic movements
       function drawLink() {
         let speed = 2;
         animationCounter++;
 
-        if (leftPressed) {
+        if (leftPressed && !collision(linkX - speed, linkY, map7_7)) {
           linkX -= speed;
           if (currentAnimation == 0) {
             ctx.drawImage(link1, 30, 0, 16, 16, linkX, linkY, 16, 16);
@@ -86,7 +91,7 @@
               currentAnimation = 0;
             }
           }
-        } else if (rightPressed) {
+        } else if (rightPressed && !collision(linkX + speed, linkY, map7_7)) {
           linkX += speed;
           if (currentAnimation == 0) {
             ctx.drawImage(link1, 91, 0, 16, 16, linkX, linkY, 16, 16);
@@ -100,7 +105,7 @@
               currentAnimation = 0;
             }
           }
-        } else if (upPressed) {
+        } else if (upPressed && !collision(linkX, linkY - speed, map7_7)) {
           linkY -= speed;
           if (currentAnimation == 0) {
             ctx.drawImage(link1, 62, 0, 16, 16, linkX, linkY, 16, 16);
@@ -114,7 +119,7 @@
               currentAnimation = 0;
             }
           }
-        } else if (downPressed) {
+        } else if (downPressed && !collision(linkX, linkY + speed, map7_7)) {
           linkY += speed;
           if (currentAnimation == 0) {
             ctx.drawImage(link1, 0, 0, 16, 16, linkX, linkY, 16, 16);
@@ -144,26 +149,45 @@
         }
       }
 
-			//This is the tilemap for the first level of the game; later there will be a tilemap for every level
+      //This is the tilemap for the first level of the game; later there will be a tilemap for every level
       let map7_7 = [
-				[ 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22 ],
-				[ 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22 ],
-				[ 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22 ],
-				[ 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22 ],
-				[ 61, 61, 61, 61, 61, 61, 61,  2,  2, 61, 61, 61, 61, 61, 61, 61 ],
-				[ 61, 61, 61, 61, 28, 61, 62,  2,  2, 61, 61, 61, 61, 61, 61, 61 ],
-				[ 61, 61, 61, 62,  2,  2,  2,  2,  2, 61, 61, 61, 61, 61, 61, 61 ],
-				[ 61, 61, 62,  2,  2,  2,  2,  2,  2, 61, 61, 61, 61, 61, 61, 61 ],
-				[ 61, 62,  2,  2,  2,  2,  2,  2,  2, 60, 61, 61, 61, 61, 61, 61 ],
-				[  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2 ],
-				[ 43, 44,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2, 43, 43 ],
-				[ 61, 61,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2, 61, 61 ],
-				[ 61, 61,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2, 61, 61 ],
-				[ 61, 61, 43, 43, 43, 43, 43, 43, 43, 43, 43, 43, 43, 43, 61, 61 ],
-				[ 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61 ],
+        [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+        [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+        [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+        [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+        [61, 61, 61, 61, 61, 61, 61, 2, 2, 61, 61, 61, 61, 61, 61, 61],
+        [61, 61, 61, 61, 28, 61, 62, 2, 2, 61, 61, 61, 61, 61, 61, 61],
+        [61, 61, 61, 62, 2, 2, 2, 2, 2, 61, 61, 61, 61, 61, 61, 61],
+        [61, 61, 62, 2, 2, 2, 2, 2, 2, 61, 61, 61, 61, 61, 61, 61],
+        [61, 62, 2, 2, 2, 2, 2, 2, 2, 60, 61, 61, 61, 61, 61, 61],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [43, 44, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 43, 43],
+        [61, 61, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 61, 61],
+        [61, 61, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 61, 61],
+        [61, 61, 43, 43, 43, 43, 43, 43, 43, 43, 43, 43, 43, 43, 61, 61],
+        [61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61],
       ];
 
-			//drawMap will render whatever level Link is in
+      //This is the first cave in the game, accessible through the first map
+      let mapWoodSword = [
+        [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+        [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+        [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+        [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+        [55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55],
+        [55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55],
+        [55, 55, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 55, 55],
+        [55, 55, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 55, 55],
+        [55, 55, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 55, 55],
+        [55, 55, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 55, 55],
+        [55, 55, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 55, 55],
+        [55, 55, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 55, 55],
+        [55, 55, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 55, 55],
+        [55, 55, 37, 37, 37, 37, 37, 28, 28, 37, 37, 37, 37, 37, 55, 55],
+        [55, 55, 55, 55, 55, 55, 55, 28, 28, 55, 55, 55, 55, 55, 55, 55],
+      ];
+
+      //drawMap will render whatever level Link is in
       function drawMap(level) {
         for (let i = 0; i < level.length; i++) {
           for (let j = 0; j < level[i].length; j++) {
@@ -182,7 +206,25 @@
         }
       }
 
-			//draw will render everything
+      function collision(x, y, map) {
+        for (let i = 0; i < map.length; i++) {
+          for (let j = 0; j < map[i].length; j++) {
+            if (map[i][j] != 2) {
+              if (
+                x <= j * 16 + 16 &&
+                x + 12 >= j * 16 &&
+                y + 10 <= i * 16 + 16 &&
+                y + 16 >= i * 16
+              ) {
+                return true;
+              }
+            }
+          }
+        }
+        return false;
+      }
+
+      //draw will render everything
       function draw() {
         setTimeout(function () {
           requestAnimationFrame(draw);
